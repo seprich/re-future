@@ -35,15 +35,20 @@ let flatMap =
     make(setter =>
       addChainFn_(future, v => addChainFn_(fn(v), setter)));
 
-let map = (future, fn) => flatMap(future, v => fromValue(fn(v)));
+let map =
+  (future, fn) =>
+    make(setter =>
+      addChainFn_(future, v => setter(fn(v))));
 
 let effect =
-  (future, fn) => {
-    addChainFn_(future, fn);
-    future;
-  };
+  (future, fn) =>
+    make(setter =>
+      addChainFn_(future, v => {
+        fn(v);
+        setter(v);
+      }));
 
-let waitEffect = (future, fn) => flatMap(future, fn) -> flatMap(() => future);
+let waitEffect = (future, fn) => flatMap(future, value => map(fn(value), () => value));
 
 let all =
   listOfFutures =>
