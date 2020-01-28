@@ -18,3 +18,5 @@ let map5: (t('a), t('b), t('c), t('d), t('e), ('a, 'b, 'c, 'd, 'e) => 'r) => t('
 let map6: (t('a), t('b), t('c), t('d), t('e), t('f), ('a, 'b, 'c, 'd, 'e, 'f) => 'r) => t('r);
 
 let get: (t('a), 'a => unit) => unit;
+
+let toPromise: t('a) => Js.Promise.t('a);

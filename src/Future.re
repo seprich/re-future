@@ -7,11 +7,13 @@ let make =
   delegateFn => {
     let setter: t('a) => 'a => unit =
       (promise, value) => {
+        if (Belt.Option.isSome(promise.value)) failwith("Future value can be set only once - subsequent setter calls rejected");
         promise.value = Some(value);
-        //promise.fnChain -> Belt.List.reverse -> Belt.List.forEach(fn => fn(value));
-        promise.fnChain -> Belt.List.reverse -> Belt.List.forEach(fn => Js.Global.setTimeout(() => fn(value), 0));
+        /* The following optimizes memory footprint.
+         * Order of execution not stable but there should not be need for a specific order for these internal plumbings */
+        promise.fnChain -> Belt.List.forEach(fn => Js.Global.setTimeout(() => fn(value), 0));
         promise.fnChain = [];
-      }
+      };
     let promise = { value: None, fnChain: [] };
     delegateFn(setter(promise));
     promise;
@@ -83,3 +85,7 @@ let map6 =
               f6 -> map(r6 => fn(r1, r2, r3, r4, r5, r6)))))));
 
 let get = addChainFn_;
+
+let toPromise: t('a) => Js.Promise.t('a) =
+  future =>
+    Js.Promise.make((~resolve, ~reject as _) => addChainFn_(future, value => resolve(. value)));
