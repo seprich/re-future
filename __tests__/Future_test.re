@@ -38,6 +38,15 @@ describe("Future", () => {
     -> assertEqual(42, test)
   });
 
+  testAsync("`make` must not allow multiple resolving attempts", test => {
+    let nastyResolver = (setter) => {
+      setter("kuckoo");
+      setter("changed my mind");
+    };
+    let expected = Failure("Future value can be set only once - subsequent setter calls rejected");
+    expect(() => Future.make(nastyResolver)) |> toThrowException(expected) |> test;
+  });
+
   testAsync("`effect` passes on original value and executes its argument function", test => {
     let side = ref("some");
     delay(() => "flower power", 5)
