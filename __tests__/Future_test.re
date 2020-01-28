@@ -3,7 +3,7 @@ open Expect;
 
 let delay: (unit => 'a, int) => Future.t('a) =
   (fn, timeoutMs) =>
-    Future.make(setter => Js.Global.setInterval(() => setter(fn()), timeoutMs) |> ignore);
+    Future.make(setter => Js.Global.setTimeout(() => setter(fn()), timeoutMs) |> ignore);
 
 let assertEqual: Future.t('a) => 'a => (assertion => unit) => unit =
   (future, expected, done_) =>
@@ -108,6 +108,16 @@ describe("Future", () => {
       (a, b, c, d, e, f) => (b, c, d, e, a, f),
     )
     -> assertEqual(("more", "testing", false, "or less", 123, 34.235), test)
+  });
+
+  testAsync("`toPromise`", test => {
+    let promise = delay(() => "should be converted", 5) -> Future.toPromise;
+    promise
+    |> Js.Promise.then_(value => {
+        expect(value) |> toEqual("should be converted") |> test;
+        Js.Promise.resolve(());
+      })
+    |> ignore;
   });
 
 });
