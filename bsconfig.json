@@ -9,6 +9,10 @@
     {
       "dir": "__tests__",
       "type": "dev"
+    },
+    {
+      "dir": "__perf__",
+      "type": "dev"
     }
   ],
   "package-specs": {

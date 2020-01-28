@@ -9,7 +9,8 @@
   "scripts": {
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
-    "test": "npm run clean && npm run build && jest"
+    "test": "npm run clean && npm run build && jest",
+    "perf": "npm run clean && npm run build && node --expose-gc ./lib/js/__perf__/Main.bs.js"
   },
   "peerDependencies": {
     "bs-platform": ">= 5.0.0"
