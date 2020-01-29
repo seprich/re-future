@@ -1,6 +1,14 @@
 type gt('a, 'e) = Future.t(Belt.Result.t('a, 'e));
 type t('a) = gt('a, exn);
 
+let make =
+  delegateFn =>
+    Future.make(setter => {
+      let resolveCb = value => setter(Belt.Result.Ok(value));
+      let rejectCb = value => setter(Belt.Result.Error(value));
+      delegateFn(resolveCb, rejectCb);
+    });
+
 let fromValue = value => Future.fromValue(Belt.Result.Ok(value));
 let fromError = error => Future.fromValue(Belt.Result.Error(error));
 let fromResult = Future.fromValue;

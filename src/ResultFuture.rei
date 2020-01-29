@@ -1,13 +1,13 @@
 type gt('a, 'e);
 type t('a) = gt('a, exn);
 
+let make: (('a => unit, 'e => unit) => unit) => gt('a, 'e);
+
 let fromJsPromiseDefault:  Js.Promise.t('a) => t('a);
 let toJsPromiseDefault:    t('a) => Js.Promise.t('a);
 
 let fromJsPromise: (Js.Promise.t('a), Js.Promise.error => 'e) => gt('a, 'e);
 let toJsPromise:   (gt('a, 'e), 'e => exn) => Js.Promise.t('a);
-
-/* TODO make ! */
 
 let fromValue:  'a => gt('a, 'e);
 let fromError:  'e => gt('a, 'e);
