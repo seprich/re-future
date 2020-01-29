@@ -24,13 +24,20 @@ let toJsPromise =
       |> ignore
     });
 
-let dirtyConvertFixme: Js.Promise.error => exn =
-  error =>
-    try (Js.Exn.raiseError(Js.String.make(error))) {
+let convertPromiseErrorToExn: Js.Promise.error => exn =
+  error => {
+    /* Unfortunately Js.Promise.error is very useless type and following is necessary if we wish to be able to access it's contents */
+    let retype: (. Js.Promise.error) => exn = [%raw {| function(e) { return e; } |}];
+    /* It seems insane to first raise and then immediately catch an error, but we do this to generate magical javascript code.
+     * On the javascript side bucklescript generates a function call `Caml_js_exceptions.internalToOCamlException(raw_error)`
+     * into the `catch` segment. That function is the only one which is able to make sure that both ReasonML-originated and JS-originated
+     * error objects are enriched with hidden/internal meta data needed by bucklescript. */
+    try (raise(retype(. error))) {
       | error => error
     }
+  };
 
-let fromJsPromiseDefault = jsPromise => fromJsPromise(jsPromise, dirtyConvertFixme);
+let fromJsPromiseDefault = jsPromise => fromJsPromise(jsPromise, convertPromiseErrorToExn);
 let toJsPromiseDefault = future => toJsPromise(future, x => x);
 
 let mapOk =
