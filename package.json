@@ -10,13 +10,15 @@
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",
     "test": "npm run clean && npm run build && jest",
-    "perf": "npm run clean && npm run build && node --expose-gc ./lib/js/__perf__/Main.bs.js"
+    "perf": "npm run clean && npm run build && node --expose-gc ./lib/js/__perf__/Main.bs.js",
+    "travis-ci": "npm run clean && npm run build && jest --coverage --coverageReporters=text-lcov | coveralls"
   },
   "peerDependencies": {
     "bs-platform": ">= 5.0.0"
   },
   "devDependencies": {
     "@glennsl/bs-jest": "0.4.9",
-    "bs-platform": "7.0.1"
+    "bs-platform": "7.0.1",
+    "coveralls": "3.0.9"
   }
 }
