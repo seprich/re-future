@@ -1,11 +1,11 @@
 {
   "name": "@seprich/re-future",
   "version": "0.0.1",
-  "description": "Better Future",
-  "author": "",
+  "description": "Future and ResultFuture library for ReasonML",
+  "author": "Jussi Seppälä <seprich@users.noreply.github.com>",
   "license": "MIT",
   "repository": "github:seprich/re-future",
-  "keywords": [],
+  "keywords": ["Reason", "Future", "ResultFuture"],
   "scripts": {
     "clean": "bsb -clean-world",
     "build": "bsb -make-world",

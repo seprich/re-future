@@ -1,0 +1,6 @@
+__perf__/
+__tests__/
+lib/
+.gitignore
+.merlin
+.travis.yml
