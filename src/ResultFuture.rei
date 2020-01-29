@@ -7,6 +7,8 @@ let toJsPromiseDefault:    t('a) => Js.Promise.t('a);
 let fromJsPromise: (Js.Promise.t('a), Js.Promise.error => 'e) => gt('a, 'e);
 let toJsPromise:   (gt('a, 'e), 'e => exn) => Js.Promise.t('a);
 
+/* TODO make ! */
+
 let fromValue:  'a => gt('a, 'e);
 let fromError:  'e => gt('a, 'e);
 let fromResult: Belt.Result.t('a, 'e) => gt('a, 'e);
