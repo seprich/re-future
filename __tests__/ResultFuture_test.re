@@ -366,6 +366,18 @@ describe("ResultFuture", () => {
       -> assertOkEqual("hello there", eval);
     });
 
+    testAsync("`mapOkResult` ignored on Error", eval => {
+      delay(() => raise(TestException("my my")), 1)
+      -> ResultFuture.mapOkResult(value => Belt.Result.Error(OtherTestException(value)))
+      -> assertErrorEqual(TestException("my my"), eval);
+    });
+
+    testAsync("`mapErrorResult` ignored on Ok", eval => {
+      delay(() => "hello there", 1)
+      -> ResultFuture.mapErrorResult(error => Belt.Result.Ok(Js.String.make(error)))
+      -> assertOkEqual("hello there", eval);
+    });
+
     testAsync("`flatMapOk` ignored on Error", eval => {
       delay(() => raise(TestException("my my")), 1)
       -> ResultFuture.flatMapOk(value => delay(() => value ++ " miracle!", 1))
