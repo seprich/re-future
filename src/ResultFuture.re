@@ -13,6 +13,11 @@ let fromValue = value => Future.fromValue(Belt.Result.Ok(value));
 let fromError = error => Future.fromValue(Belt.Result.Error(error));
 let fromResult = Future.fromValue;
 
+let fromFutureResult = future => future;
+let fromFuture = future => Future.map(future, value => Belt.Result.Ok(value));
+let toFutureResult = future => future;
+let toFutureIgnoreResult = future => Future.map(future, ignore);
+
 let fromJsPromise =
   (jsPromise, errorConverter) =>
     Future.make(setter =>
@@ -126,10 +131,10 @@ let waitEffectError =
 
 let waitEffectResult = Future.waitEffect;
 
-let allToFutureOfResults = Future.all;
+let allToFuture = Future.all;
 
 let allOk: list(Future.t(Belt.Result.t('a, 'e))) => Future.t(Belt.Result.t(list('a), 'e)) =
-  (futures) => {
+  futures => {
     let reducer: (Belt.Result.t(list('a), 'e), Belt.Result.t('a, 'e)) => Belt.Result.t(list('a), 'e) =
       (accum, item) => switch(accum, item) {
         | (Ok(values), Ok(value)) => Ok(Belt.List.add(values, value))
@@ -139,6 +144,90 @@ let allOk: list(Future.t(Belt.Result.t('a, 'e))) => Future.t(Belt.Result.t(list(
     Future.all(futures)
     -> Future.map(results => Belt.List.reduceReverse(results, Belt.Result.Ok([]), reducer));
   };
+
+let mapResult2 =
+  (f1, f2, fn) =>
+    f1 -> flatMapResult(r1 =>
+      f2 -> mapResult(r2 => fn(r1, r2)));
+
+let mapResult3 =
+  (f1, f2, f3, fn) =>
+    f1 -> flatMapResult(r1 =>
+      f2 -> flatMapResult(r2 =>
+        f3 -> mapResult(r3 => fn(r1, r2, r3))));
+
+let mapResult4 =
+  (f1, f2, f3, f4, fn) =>
+    f1 -> flatMapResult(r1 =>
+      f2 -> flatMapResult(r2 =>
+        f3 -> flatMapResult(r3 =>
+          f4 -> mapResult(r4 => fn(r1, r2, r3, r4)))));
+
+let mapResult5 =
+  (f1, f2, f3, f4, f5, fn) =>
+    mapResult2(
+      mapResult4(f1, f2, f3, f4, (a, b, c, d) => (a, b, c, d)),
+      f5,
+      ((r1, r2, r3, r4), r5) => fn(r1, r2, r3, r4, r5));
+
+let mapResult6 =
+  (f1, f2, f3, f4, f5, f6, fn) =>
+    mapResult3(
+      mapResult4(f1, f2, f3, f4, (a, b, c, d) => (a, b, c, d)),
+      f5, f6,
+      ((r1, r2, r3, r4), r5, r6) => fn(r1, r2, r3, r4, r5, r6));
+
+let mapResult7 =
+  (f1, f2, f3, f4, f5, f6, f7, fn) =>
+    mapResult4(
+      mapResult4(f1, f2, f3, f4, (a, b, c, d) => (a, b, c, d)),
+      f5, f6, f7,
+      ((r1, r2, r3, r4), r5, r6, r7) => fn(r1, r2, r3, r4, r5, r6, r7));
+
+let mapResult8 =
+  (f1, f2, f3, f4, f5, f6, f7, f8, fn) =>
+    mapResult2(
+      mapResult4(f1, f2, f3, f4, (a, b, c, d) => (a, b, c, d)),
+      mapResult4(f5, f6, f7, f8, (a, b, c, d) => (a, b, c, d)),
+      ((r1, r2, r3, r4), (r5, r6, r7, r8)) => fn(r1, r2, r3, r4, r5, r6, r7, r8));
+
+let combineOk2 =
+  (f1, f2) =>
+    f1 -> flatMapOk(v1 =>
+      f2 -> mapOk(v2 => (v1, v2)));
+
+let combineOk3 =
+  (f1, f2, f3) =>
+    f1 -> flatMapOk(v1 =>
+      f2 -> flatMapOk(v2 =>
+        f3 -> mapOk(v3 => (v1, v2, v3))));
+
+let combineOk4 =
+  (f1, f2, f3, f4) =>
+    f1 -> flatMapOk(v1 =>
+      f2 -> flatMapOk(v2 =>
+        f3 -> flatMapOk(v3 =>
+          f4 -> mapOk(v4 => (v1, v2, v3, v4)))));
+
+let combineOk5 =
+  (f1, f2, f3, f4, f5) =>
+    combineOk2(combineOk4(f1, f2, f3, f4), f5)
+    -> mapOk((((r1, r2, r3, r4), r5)) => (r1, r2, r3, r4, r5));
+
+let combineOk6 =
+  (f1, f2, f3, f4, f5, f6) =>
+    combineOk3(combineOk4(f1, f2, f3, f4), f5, f6)
+    -> mapOk((((r1, r2, r3, r4), r5, r6)) => (r1, r2, r3, r4, r5, r6));
+
+let combineOk7 =
+  (f1, f2, f3, f4, f5, f6, f7) =>
+    combineOk4(combineOk4(f1, f2, f3, f4), f5, f6, f7)
+    -> mapOk((((r1, r2, r3, r4), r5, r6, r7)) => (r1, r2, r3, r4, r5, r6, r7));
+
+let combineOk8 =
+  (f1, f2, f3, f4, f5, f6, f7, f8) =>
+    combineOk2(combineOk4(f1, f2, f3, f4), combineOk4(f5, f6, f7, f8))
+    -> mapOk((((r1, r2, r3, r4), (r5, r6, r7, r8))) => (r1, r2, r3, r4, r5, r6, r7, r8));
 
 let getOk =
   (future, fn) =>
@@ -155,5 +244,3 @@ let getError =
     });
 
 let getResult = Future.get;
-
-let ignore = future => Future.map(future, ignore);

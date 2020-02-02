@@ -64,9 +64,9 @@ describe("ResultFuture", () => {
       -> ResultFuture.getResult(result => expect(result) |> toEqual(Belt.Result.Ok("quark")) |> eval);
     });
 
-    testAsync("`ignore`", eval => {
+    testAsync("`toFutureIgnoreResult`", eval => {
       ResultFuture.fromValue("quark")
-      -> ResultFuture.ignore
+      -> ResultFuture.toFutureIgnoreResult
       -> Future.get(value => expect(value) |> toEqual(()) |> eval);
     });
 
@@ -82,6 +82,24 @@ describe("ResultFuture", () => {
         (_resolve, reject) => Js.Global.setTimeout(() => reject(`ChamoMilly), 1) |> ignore
       )
       -> assertErrorEqual(`ChamoMilly, eval);
+    });
+
+    testAsync("`fromFutureResult`", eval => {
+      Future.fromValue(Belt.Result.Ok(42))
+      -> ResultFuture.fromFutureResult
+      -> assertOkEqual(42, eval);
+    });
+
+    testAsync("`fromFuture`", eval => {
+      Future.fromValue("whaat!")
+      -> ResultFuture.fromFuture
+      -> assertOkEqual("whaat!", eval);
+    });
+
+    testAsync("`toFutureResult`", eval => {
+      delay(() => "kuckoo", 1)
+      -> ResultFuture.toFutureResult
+      -> Future.get(result => expect(result) |> toEqual(Belt.Result.Ok("kuckoo")) |> eval);
     });
 
     testAsync("`fromJsPromiseDefault` test Ok", eval => {
@@ -320,7 +338,7 @@ describe("ResultFuture", () => {
     testAsync("`waitEffectOk` executes on Ok", eval => {
       let side = ref("initial value");
       delay(() => "yellow", 1)
-      -> ResultFuture.waitEffectOk(value => delay(() => { side := value }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.waitEffectOk(value => delay(() => { side := value }, 5) -> ResultFuture.toFutureIgnoreResult)
       -> ResultFuture.getOk(value => expect((value, side^)) |> toEqual(("yellow", "yellow")) |> eval);
     });
 
@@ -328,7 +346,7 @@ describe("ResultFuture", () => {
       let side = ref("initial value");
       delay(() => raise(TestException("blue")), 1)
       -> ResultFuture.waitEffectError(error => switch (error) {
-        | TestException(msg) => delay(() => { side := msg }, 5) -> ResultFuture.ignore
+        | TestException(msg) => delay(() => { side := msg }, 5) -> ResultFuture.toFutureIgnoreResult
         | _ => Future.fromValue(())
       })
       -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("blue"), "blue")) |> eval );
@@ -337,7 +355,7 @@ describe("ResultFuture", () => {
     testAsync("`waitEffectResult` 1", eval => {
       let side = ref("initial value");
       delay(() => "green", 1)
-      -> ResultFuture.waitEffectResult(result => delay(() => { side := Belt.Result.getExn(result) }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.waitEffectResult(result => delay(() => { side := Belt.Result.getExn(result) }, 5) -> ResultFuture.toFutureIgnoreResult)
       -> ResultFuture.getOk(value => expect((value, side^)) |> toEqual(("green", "green")) |> eval);
     });
 
@@ -345,15 +363,15 @@ describe("ResultFuture", () => {
       let side = ref("initial value");
       delay(() => raise(TestException("blue")), 1)
       -> ResultFuture.waitEffectResult(result => switch (result) {
-        | Error(TestException(msg)) => delay(() => { side := msg }, 5) -> ResultFuture.ignore
+        | Error(TestException(msg)) => delay(() => { side := msg }, 5) -> ResultFuture.toFutureIgnoreResult
         | _ => Future.fromValue(())
       })
       -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("blue"), "blue")) |> eval );
     });
 
-    testAsync("`allToFutureOfResults`", eval => {
+    testAsync("`allToFuture`", eval => {
       [ delay(() => raise(TestException("first")), 5), ResultFuture.fromValue("second"), delay(() => "third", 1) ]
-      -> ResultFuture.allToFutureOfResults
+      -> ResultFuture.allToFuture
       -> Future.get(results => expect(results) |> toEqual([Error(TestException("first")), Ok("second"), Ok("third")]) |> eval);
     });
 
@@ -378,6 +396,188 @@ describe("ResultFuture", () => {
       ]
       -> ResultFuture.allOk
       -> assertErrorEqual(TestException("third"), eval);
+    });
+
+    testAsync("`combineOk2`", eval => {
+      ResultFuture.combineOk2(
+        delay(() => "kuckoo", 1),
+        delay(() => 235, 1),
+      )
+      -> assertOkEqual(("kuckoo", 235), eval);
+    });
+
+    testAsync("`combineOk3`", eval => {
+      ResultFuture.combineOk3(
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+      )
+      -> assertOkEqual(("hi", false, 23.545), eval);
+    });
+
+    testAsync("`combineOk4`", eval => {
+      ResultFuture.combineOk4(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+      )
+      -> assertOkEqual((true, "hi", false, 23.545), eval);
+    });
+
+    testAsync("`combineOk5`", eval => {
+      ResultFuture.combineOk5(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+      )
+      -> assertOkEqual((true, "hi", false, 23.545, TestException("other")), eval);
+    });
+
+    testAsync("`combineOk6`", eval => {
+      ResultFuture.combineOk6(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+      )
+      -> assertOkEqual((true, "hi", false, 23.545, TestException("other"), "sixth"), eval);
+    });
+
+    testAsync("`combineOk7`", eval => {
+      ResultFuture.combineOk7(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+        ResultFuture.fromValue(7),
+      )
+      -> assertOkEqual((true, "hi", false, 23.545, TestException("other"), "sixth", 7), eval);
+    });
+
+    testAsync("`combineOk8`", eval => {
+      ResultFuture.combineOk8(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+        ResultFuture.fromValue(7),
+        delay(() => 23, 1),
+      )
+      -> assertOkEqual((true, "hi", false, 23.545, TestException("other"), "sixth", 7, 23), eval);
+    });
+
+    testAsync("`mapResult2`", eval => {
+      ResultFuture.mapResult2(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        (r1, r2) => switch (r1, r2) {
+          | (Ok(v1), Ok(v2)) => Ok((v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual(("hi", true), eval);
+    });
+
+    testAsync("`mapResult3`", eval => {
+      ResultFuture.mapResult3(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        (r1, r2, r3) => switch (r1, r2, r3) {
+          | (Ok(v1), Ok(v2), Ok(v3)) => Ok((v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual((false, "hi", true), eval);
+    });
+
+    testAsync("`mapResult4`", eval => {
+      ResultFuture.mapResult4(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        (r1, r2, r3, r4) => switch (r1, r2, r3, r4) {
+          | (Ok(v1), Ok(v2), Ok(v3), Ok(v4)) => Ok((v4, v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual((23.545, false, "hi", true), eval);
+    });
+
+    testAsync("`mapResult5`", eval => {
+      ResultFuture.mapResult5(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        (r1, r2, r3, r4, r5) => switch (r1, r2, r3, r4, r5) {
+          | (Ok(v1), Ok(v2), Ok(v3), Ok(v4), Ok(v5)) => Ok((v5, v4, v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual((TestException("other"), 23.545, false, "hi", true), eval);
+    });
+
+    testAsync("`mapResult6`", eval => {
+      ResultFuture.mapResult6(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+        (r1, r2, r3, r4, r5, r6) => switch (r1, r2, r3, r4, r5, r6) {
+          | (Ok(v1), Ok(v2), Ok(v3), Ok(v4), Ok(v5), Ok(v6)) => Ok((v6, v5, v4, v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual(("sixth", TestException("other"), 23.545, false, "hi", true), eval);
+    });
+
+    testAsync("`mapResult7`", eval => {
+      ResultFuture.mapResult7(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+        ResultFuture.fromValue(7),
+        (r1, r2, r3, r4, r5, r6, r7) => switch (r1, r2, r3, r4, r5, r6, r7) {
+          | (Ok(v1), Ok(v2), Ok(v3), Ok(v4), Ok(v5), Ok(v6), Ok(v7)) => Ok((v7, v6, v5, v4, v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual((7, "sixth", TestException("other"), 23.545, false, "hi", true), eval);
+    });
+
+    testAsync("`mapResult8`", eval => {
+      ResultFuture.mapResult8(
+        ResultFuture.fromValue(true),
+        delay(() => "hi", 1),
+        ResultFuture.fromValue(false),
+        delay(() => 23.545, 1),
+        delay(() => TestException("other"), 1),
+        ResultFuture.fromValue("sixth"),
+        ResultFuture.fromValue(7),
+        delay(() => 23, 1),
+        (r1, r2, r3, r4, r5, r6, r7, r8) => switch (r1, r2, r3, r4, r5, r6, r7, r8) {
+          | (Ok(v1), Ok(v2), Ok(v3), Ok(v4), Ok(v5), Ok(v6), Ok(v7), Ok(v8)) => Ok((v8, v7, v6, v5, v4, v3, v2, v1))
+          | _ => Error(Failure("unexpected"))
+        }
+      )
+      -> assertOkEqual((23, 7, "sixth", TestException("other"), 23.545, false, "hi", true), eval);
     });
   });
 
@@ -436,14 +636,14 @@ describe("ResultFuture", () => {
     testAsync("`waitEffectOk` does not execute on Error", eval => {
       let side = ref("initial");
       delay(() => raise(TestException("my my")), 1)
-      -> ResultFuture.waitEffectOk(value => delay(() => { side := value }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.waitEffectOk(value => delay(() => { side := value }, 5) -> ResultFuture.toFutureIgnoreResult)
       -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("my my"), "initial")) |> eval);
     });
 
     testAsync("`waitEffectError` does not execute on Ok", eval => {
       let side = ref("initial");
       delay(() => "hello there", 1)
-      -> ResultFuture.waitEffectError(error => delay(() => { side := Js.String.make(error) }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.waitEffectError(error => delay(() => { side := Js.String.make(error) }, 5) -> ResultFuture.toFutureIgnoreResult)
       -> ResultFuture.getOk(value => expect((value, side^)) |> toEqual(("hello there", "initial")) |> eval);
     });
 

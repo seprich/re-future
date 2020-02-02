@@ -54,40 +54,61 @@ let all =
   listOfFutures =>
     Belt.List.reduceReverse(listOfFutures, fromValue([]), (accumulator, future) => flatMap(future, result => map(accumulator, results => [result, ...results])));
 
-let map2 =
-  (f1, f2, fn) =>
+let combine2 =
+  (f1, f2) =>
      f1 -> flatMap(r1 =>
-       f2 -> map(r2 => fn(r1, r2)));
+       f2 -> map(r2 => (r1, r2)));
 
-let map3 =
-  (f1, f2, f3, fn) =>
+let combine3 =
+  (f1, f2, f3) =>
     f1 -> flatMap(r1 =>
       f2 -> flatMap(r2 =>
-        f3 -> map(r3 => fn(r1, r2, r3))));
+        f3 -> map(r3 => (r1, r2, r3))));
 
-let map4 =
-  (f1, f2, f3, f4, fn) =>
+let combine4 =
+  (f1, f2, f3, f4) =>
     f1 -> flatMap(r1 =>
       f2 -> flatMap(r2 =>
         f3 -> flatMap(r3 =>
-          f4 -> map(r4 => fn(r1, r2, r3, r4)))));
+          f4 -> map(r4 => (r1, r2, r3, r4)))));
 
-let map5 =
-  (f1, f2, f3, f4, f5, fn) =>
+let combine5 =
+  (f1, f2, f3, f4, f5) =>
     f1 -> flatMap(r1 =>
       f2 -> flatMap(r2 =>
         f3 -> flatMap(r3 =>
           f4 -> flatMap(r4 =>
-            f5 -> map(r5 => fn(r1, r2, r3, r4, r5))))));
+            f5 -> map(r5 => (r1, r2, r3, r4, r5))))));
 
-let map6 =
-  (f1, f2, f3, f4, f5, f6, fn) =>
+let combine6 =
+  (f1, f2, f3, f4, f5, f6) =>
     f1 -> flatMap(r1 =>
       f2 -> flatMap(r2 =>
         f3 -> flatMap(r3 =>
           f4 -> flatMap(r4 =>
             f5 -> flatMap(r5 =>
-              f6 -> map(r6 => fn(r1, r2, r3, r4, r5, r6)))))));
+              f6 -> map(r6 => (r1, r2, r3, r4, r5, r6)))))));
+
+let combine7 =
+  (f1, f2, f3, f4, f5, f6, f7) =>
+    f1 -> flatMap(r1 =>
+      f2 -> flatMap(r2 =>
+        f3 -> flatMap(r3 =>
+          f4 -> flatMap(r4 =>
+            f5 -> flatMap(r5 =>
+              f6 -> flatMap(r6 =>
+                f7 -> map(r7 => (r1, r2, r3, r4, r5, r6, r7))))))));
+
+let combine8 =
+  (f1, f2, f3, f4, f5, f6, f7, f8) =>
+    f1 -> flatMap(r1 =>
+      f2 -> flatMap(r2 =>
+        f3 -> flatMap(r3 =>
+          f4 -> flatMap(r4 =>
+            f5 -> flatMap(r5 =>
+              f6 -> flatMap(r6 =>
+                f7 -> flatMap(r7 =>
+                  f8 -> map(r8 => (r1, r2, r3, r4, r5, r6, r7, r8)))))))));
 
 let get = addChainFn_;
 
