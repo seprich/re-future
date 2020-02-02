@@ -31,10 +31,10 @@ let waitEffectOk:     (gt('a, 'e), 'a => Future.t(unit)) => gt('a, 'e);
 let waitEffectError:  (gt('a, 'e), 'e => Future.t(unit)) => gt('a, 'e);
 let waitEffectResult: (gt('a, 'e), Belt.Result.t('a, 'e) => Future.t(unit)) => gt('a, 'e);
 
-/*
 let allOk:                list(gt('a, 'e)) => gt(list('a), 'e);
-let allToFutureOfResults: list(gt('a, 'e)) => Future.t(Belt.Result.t('a, 'e));
+let allToFutureOfResults: list(gt('a, 'e)) => Future.t(list(Belt.Result.t('a, 'e)));
 
+/*
 let map2: (gt('a, 'e), gt('b, 'e), ('a, 'b) => 'r) => gt('r, 'e);
 let map3: (gt('a, 'e), gt('b, 'e), gt('c, 'e), ('a, 'b, 'c) => 'r) => gt('r, 'e);
 let map4: (gt('a, 'e), gt('b, 'e), gt('c, 'e), gt('d, 'e), ('a, 'b, 'c, 'd) => 'r) => gt('r, 'e);

@@ -350,6 +350,35 @@ describe("ResultFuture", () => {
       })
       -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("blue"), "blue")) |> eval );
     });
+
+    testAsync("`allToFutureOfResults`", eval => {
+      [ delay(() => raise(TestException("first")), 5), ResultFuture.fromValue("second"), delay(() => "third", 1) ]
+      -> ResultFuture.allToFutureOfResults
+      -> Future.get(results => expect(results) |> toEqual([Error(TestException("first")), Ok("second"), Ok("third")]) |> eval);
+    });
+
+    testAsync("`allOk` empty list is Ok", eval => {
+      []
+      -> ResultFuture.allOk
+      -> assertOkEqual([], eval);
+    });
+
+    testAsync("`allOk` with ok results", eval => {
+      [ delay(() => "first", 4), ResultFuture.fromValue("second"), delay(() => "third", 1) ]
+      -> ResultFuture.allOk
+      -> assertOkEqual(["first", "second", "third"], eval);
+    });
+
+    testAsync("`allOk` returns the first error in the list", eval => {
+      [
+        ResultFuture.fromValue("first"),
+        delay(() => "second", 3),
+        delay(() => raise(TestException("third")), 3),
+        ResultFuture.fromError(OtherTestException("fourth"))
+      ]
+      -> ResultFuture.allOk
+      -> assertErrorEqual(TestException("third"), eval);
+    });
   });
 
   describe("Negative tests", () => {

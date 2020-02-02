@@ -126,6 +126,20 @@ let waitEffectError =
 
 let waitEffectResult = Future.waitEffect;
 
+let allToFutureOfResults = Future.all;
+
+let allOk: list(Future.t(Belt.Result.t('a, 'e))) => Future.t(Belt.Result.t(list('a), 'e)) =
+  (futures) => {
+    let reducer: (Belt.Result.t(list('a), 'e), Belt.Result.t('a, 'e)) => Belt.Result.t(list('a), 'e) =
+      (accum, item) => switch(accum, item) {
+        | (Ok(values), Ok(value)) => Ok(Belt.List.add(values, value))
+        | (_, Error(error)) => Error(error)
+        | (Error(error), _) => Error(error)
+      };
+    Future.all(futures)
+    -> Future.map(results => Belt.List.reduceReverse(results, Belt.Result.Ok([]), reducer));
+  };
+
 let getOk =
   (future, fn) =>
     Future.get(future, result => switch (result) {
