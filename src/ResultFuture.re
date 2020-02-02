@@ -141,3 +141,5 @@ let getError =
     });
 
 let getResult = Future.get;
+
+let ignore = future => Future.map(future, ignore);

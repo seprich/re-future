@@ -31,6 +31,18 @@ let waitEffectOk:     (gt('a, 'e), 'a => Future.t(unit)) => gt('a, 'e);
 let waitEffectError:  (gt('a, 'e), 'e => Future.t(unit)) => gt('a, 'e);
 let waitEffectResult: (gt('a, 'e), Belt.Result.t('a, 'e) => Future.t(unit)) => gt('a, 'e);
 
+/*
+let allOk:                list(gt('a, 'e)) => gt(list('a), 'e);
+let allToFutureOfResults: list(gt('a, 'e)) => Future.t(Belt.Result.t('a, 'e));
+
+let map2: (gt('a, 'e), gt('b, 'e), ('a, 'b) => 'r) => gt('r, 'e);
+let map3: (gt('a, 'e), gt('b, 'e), gt('c, 'e), ('a, 'b, 'c) => 'r) => gt('r, 'e);
+let map4: (gt('a, 'e), gt('b, 'e), gt('c, 'e), gt('d, 'e), ('a, 'b, 'c, 'd) => 'r) => gt('r, 'e);
+let map5: (gt('a, 'e), gt('b, 'e), gt('c, 'e), gt('d, 'e), gt('f, 'e), ('a, 'b, 'c, 'd, 'f) => 'r) => gt('r, 'e);
+let map6: (gt('a, 'e), gt('b, 'e), gt('c, 'e), gt('d, 'e), gt('f, 'e), gt('g, 'e), ('a, 'b, 'c, 'd, 'f, 'g) => 'r) => gt('r, 'e);
+*/
+
 let getOk:     (gt('a, 'e), 'a => unit) => unit;
 let getError:  (gt('a, 'e), 'e => unit) => unit;
 let getResult: (gt('a, 'e), Belt.Result.t('a, 'e) => unit) => unit;
+let ignore:    gt('a, 'e) => Future.t(unit);
