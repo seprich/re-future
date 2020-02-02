@@ -352,26 +352,74 @@ describe("ResultFuture", () => {
     });
   });
 
-  /*
   describe("Negative tests", () => {
-    testAsync("`mapOk` ignored on Error", eval => {});
 
-    testAsync("`mapError` ignored on Ok", eval => {});
-
-    testAsync("`flatMapOk` ignored on Error", eval => {});
-
-    testAsync("`flatMapError` ignored on Ok", eval => {});
-
-    testAsync("`effectOk` does not execute on Error", eval => {
-      delay(() => 33, 1)
+    testAsync("`mapOk` ignored on Error", eval => {
+      delay(() => raise(TestException("my my")), 1)
+      -> ResultFuture.mapOk(value => "¿" ++ value ++ "?")
+      -> assertErrorEqual(TestException("my my"), eval);
     });
 
-    testAsync("`effectError` does not execute on Ok", eval => {});
+    testAsync("`mapError` ignored on Ok", eval => {
+      delay(() => "hello there", 1)
+      -> ResultFuture.mapError(_ => OtherTestException("exception"))
+      -> assertOkEqual("hello there", eval);
+    });
 
-    testAsync("`waitEffectOk` does not execute on Error", eval => {});
+    testAsync("`flatMapOk` ignored on Error", eval => {
+      delay(() => raise(TestException("my my")), 1)
+      -> ResultFuture.flatMapOk(value => delay(() => value ++ " miracle!", 1))
+      -> assertErrorEqual(TestException("my my"), eval);
+    });
 
-    testAsync("`waitEffectError` does not execute on Ok", eval => {});
+    testAsync("`flatMapError` ignored on Ok", eval => {
+      delay(() => "hello there", 1)
+      -> ResultFuture.flatMapError(error => delay(() => Js.String.make(error) ++ " miracle healing!", 1))
+      -> assertOkEqual("hello there", eval);
+    });
 
+    testAsync("`effectOk` does not execute on Error", eval => {
+      let side = ref("initial");
+      delay(() => raise(TestException("my my")), 1)
+      -> ResultFuture.effectOk(value => { side := value })
+      -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("my my"), "initial")) |> eval);
+    });
+
+    testAsync("`effectError` does not execute on Ok", eval => {
+      let side = ref("initial");
+      delay(() => "hello there", 1)
+      -> ResultFuture.effectError(error => { side := Js.String.make(error) })
+      -> ResultFuture.getOk(value => expect((value, side^)) |> toEqual(("hello there", "initial")) |> eval);
+    });
+
+    testAsync("`waitEffectOk` does not execute on Error", eval => {
+      let side = ref("initial");
+      delay(() => raise(TestException("my my")), 1)
+      -> ResultFuture.waitEffectOk(value => delay(() => { side := value }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.getError(error => expect((error, side^)) |> toEqual((TestException("my my"), "initial")) |> eval);
+    });
+
+    testAsync("`waitEffectError` does not execute on Ok", eval => {
+      let side = ref("initial");
+      delay(() => "hello there", 1)
+      -> ResultFuture.waitEffectError(error => delay(() => { side := Js.String.make(error) }, 5) -> ResultFuture.ignore)
+      -> ResultFuture.getOk(value => expect((value, side^)) |> toEqual(("hello there", "initial")) |> eval);
+    });
+
+    testAsync("`getOk` not executed on error", eval => {
+      let side = ref("initial");
+      ResultFuture.fromError(TestException("kuckoo"))
+      -> ResultFuture.getOk(value => { side := value ++ "<- is possible?" });
+      delay(() => (), 5)
+      -> ResultFuture.getResult(_ => expect(side^) |> toEqual("initial") |> eval);
+    });
+
+    testAsync("`getError` not executed on ok", eval => {
+      let side = ref("initial");
+      ResultFuture.fromValue("kuckoo")
+      -> ResultFuture.getError(error => { side := Js.String.make(error) })
+      delay(() => (), 5)
+      -> ResultFuture.getResult(_ => expect(side^) |> toEqual("initial") |> eval);
+    });
   });
-  */
 });
