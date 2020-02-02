@@ -10,13 +10,13 @@ Special focus has been given to provide complete and yet compact set of utility 
 
 ### Install
 ```bash
-npm install @seprich/re-future
+npm install @rejs/re-future
 ```
 
 Edit to `bsconfig.json`:
 
 ```
-"bs-dependencies": [..., "@seprich/re-future", ...],
+"bs-dependencies": [..., "@rejs/re-future", ...],
 ```
 
 ### Future & ReasonFuture
@@ -25,11 +25,11 @@ This library contains two modules `Future` and `ResultFuture`. The `Future` is t
 
 This library is namespaced; to simplify access do:
 ```reason
-module ResultFuture = SeprichReFuture.ResultFuture;
+module ResultFuture = RejsReFuture.ResultFuture;
 ```
 or if you need both at the same time:
 ```reason
-open SeprichReFuture;
+open RejsReFuture;
 ```
 
 ## Module `Future`
@@ -194,8 +194,8 @@ it is recommended that when using this lib the type `t` would be preferred.
 
 
 
-[npm-image]: https://img.shields.io/npm/v/@seprich/re-future.svg
-[npm-uri]: https://www.npmjs.com/package/@seprich/re-future
+[npm-image]: https://img.shields.io/npm/v/@rejs/re-future.svg
+[npm-uri]: https://www.npmjs.com/package/@rejs/re-future
 [travis-image]: https://travis-ci.org/seprich/re-future.svg?branch=master
 [travis-uri]: https://travis-ci.org/seprich/re-future
 [coveralls-image]: https://coveralls.io/repos/github/seprich/re-future/badge.svg?branch=master

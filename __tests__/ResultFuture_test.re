@@ -143,7 +143,7 @@ describe("ResultFuture", () => {
         -> ResultFuture.toJsPromiseDefault
       )
       |> Js.Promise.catch(error => {
-        expect(Js.String.make(error)) |> toEqual("ResultFuture_test-SeprichReFuture.TestException,4,picadilly circus") |> eval;
+        expect(Js.String.make(error)) |> toEqual("ResultFuture_test-RejsReFuture.TestException,4,picadilly circus") |> eval;
         Js.Promise.resolve(());
       }) |> ignore;
     });

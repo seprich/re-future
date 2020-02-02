@@ -1,6 +1,6 @@
 {
-  "name": "@seprich/re-future",
-  "version": "0.2.1",
+  "name": "@rejs/re-future",
+  "version": "0.2.2",
   "sources": [
     {
       "dir": "src",
