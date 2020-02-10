@@ -24,57 +24,57 @@ Edit to `bsconfig.json`:
 This library contains two modules `Future` and `ResultFuture`. The `Future` is the most simple unit of evaluable value which presumably resolves at some point in the future. `ResultFuture` is a future that eventually contains `Belt.Result.t` result inside. This is the most useful replacement for Js.Promise because Js.Promise also contains the possibility of resolving to Ok value or rejection to Error value.
 
 This library is namespaced; to simplify access do:
-```reasonml
+```reason
 module ResultFuture = RejsReFuture.ResultFuture;
 ```
 or if you need both at the same time:
-```reasonml
+```reason
 open RejsReFuture;
 ```
 
 ## Module `Future`
 
-```reasonml
+```reason
 type t('a);  // Future.t('a) evaluates to type 'a value in future.
 ```
 
 #### Creating:
 
 - `make` - Create a Future with callback e.g.:
-  ```reasonml
+  ```reason
   // Resolves to "value" after 1 second:
   let future = Future.make(setter => Js.Global.setTimeout(() => setter("value"), 1000) |> ignore);
   ```
 - `fromValue` - Directly e.g.:
-  ```reasonml
+  ```reason
   let future = Future.fromValue("example");   // simple, evaluates on creation.
   ```
 
 #### Conversions:
 
 - `toPromise` - To promise - resulted promise is always success:
-  ```reasonml
+  ```reason
   Future.fromValue(42) |> Future.toPromise |> Js.Promise.then_(value => { Js.log(value); Js.Promise.resolve(()) }) |> ignore;
   ```
 
 #### Effect functions do not affect the value of the future
 
 - `effect` - Simple side effect function such as logging e.g.
-  ```reasonml
+  ```reason
   let future: Future.t(string) = /* ... implementation */
   future                                      // e.g. evaluates to "test"
   -> Future.effect(value => Js.log(value))    // does not affect value
   -> Future...                                // still evaluates to "test"
   ```
 - `waitEffect` - Async side effect which must be waited upon before continuing e.g.
-  ```reasonml
+  ```reason
   let longProcess: string => Future.t(unit) = /* ... implementation */
   future                                      // e.g. evaluates to "test"
   -> Future.waitEffect(value => longProcess(value))
   -> Future...                                // still evaluates to "test"
   ```
 - `get` - Operate with final results e.g.
-  ```reasonml
+  ```reason
   future
   -> Future.get(value => Js.log(value));      // Final operation
   ```
@@ -82,14 +82,14 @@ type t('a);  // Future.t('a) evaluates to type 'a value in future.
 #### Functors
 
 - `flatMap` bind a function that returns a Future into Future:
-  ```reasonml
+  ```reason
   let processing: string => Future.t(string) = /* ... implementation */
   future
   -> Future.flatMap(processing)
   -> Future...  /* value is now whatever was created by `processing` from the initial value */
   ```
 - `map` e.g.:
-  ```reasonml
+  ```reason
   future.fromValue("Simple Example")
   -> Future.map(Js.String.toLowerCase)
   -> Future.get(Js.log)               // -> "simple example"
@@ -98,19 +98,19 @@ type t('a);  // Future.t('a) evaluates to type 'a value in future.
 #### Combining Futures
 
 - `all` - List of Futures to Future of List:
-  ```reasonml
+  ```reason
   Future.all([future1, future2, future3])
   -> Future.get([value1, value2, value3] => /* ... values evaluated from the list of futures */);
   ```
 - `combine2` ... `combine8` - Combine heterogenously typed futures into a Future containing a tuple of values.
-  ```reasonml
+  ```reason
   Future.combine2((future1, future2))
   -> Future.get((value1, value2) => /* different kind of values from each future */)
   ```
 
 ## Module `ResultFuture`
 
-```reasonml
+```reason
 type gt('a, 'e);          // Generic type of ResultFuture,
                           // where 'a is ok value type and 'e error value type
 type t('a) = gt('a, exn); // ResultFuture.t where error type is exn (recommended for typical usage)
@@ -121,23 +121,23 @@ it is recommended that when using this lib the type `t` would be preferred.
 #### Creating
 
 - `make` - Using callbacks:
-  ```reasonml
+  ```reason
   let resultFuture = ResultFuture.make((_resolve, reject) => {
     Js.Global.setTimeout(() => reject(Failure("oh noes")), 1000);
   });  // A ResultFuture which resolves into error after 1 second
   ```
 - `fromValue`:
-  ```reasonml
+  ```reason
   ResultFuture.fromValue(42)
   -> ResultFuture.getOk(Js.log)  // "42"
   ```
 - `fromError`:
-  ```reasonml
+  ```reason
   ResultFuture.fromError(Failure("again"))
   -> ResultFuture.getError(Js.log)  // outputs error to the console
   ```
 - `fromResult`:
-  ```reasonml
+  ```reason
   ResultFuture.fromResult(Belt.Result.Ok("check"))
   -> ResultFuture.getOk(Js.log)  // "check"
   ```
@@ -145,7 +145,7 @@ it is recommended that when using this lib the type `t` would be preferred.
 #### Conversions
 
 - `fromJsPromiseDefault`:
-  ```reasonml
+  ```reason
   let promise = Js.Promise.resolve("quick and dirty");
   promise
   -> ResultFuture.fromJsPromiseDefault
@@ -157,7 +157,7 @@ it is recommended that when using this lib the type `t` would be preferred.
   -> ResultFuture.getError(Js.log)
   ```
 - `toJsPromiseDefault`:
-  ```reasonml
+  ```reason
   let resultFuture = ResultFuture.fromValue("to js");
   resultFuture
   -> ResultFuture.toJsPromiseDefault
@@ -171,13 +171,13 @@ it is recommended that when using this lib the type `t` would be preferred.
   // The ocaml error gets printed in its "raw" javascript form
   ```
 - `fromFutureResult`:
-  ```reasonml
+  ```reason
   Future.fromValue(Belt.Result.Ok("example"))
   -> ResultFuture.fromFutureResult
   -> ResultFuture.getOk(Js.log);     // "example"
   ```
 - `toFutureResult`:
-  ```reasonml
+  ```reason
   ResultFuture.fromValue(345)
   -> ResultFuture.toFutureResult
   -> Future.get((result: Belt.Result.t(int, 'e)) => Js.log(result)); // [345]
@@ -186,14 +186,14 @@ it is recommended that when using this lib the type `t` would be preferred.
 #### Effect functions do not affect the value
 
 - `effectOk` - effect for ok value
-  ```reasonml
+  ```reason
   ResultFuture.fromValue(345)
   -> ResultFuture.effectOk(value => Js.log("Value: " ++ Js.Int.toString(value)))
   -> ResultFuture.mapOk(value => 2 * value) //... etc.
   ```
 - `effectError` - Like effectOk but for error only.
 - `effectResult` - effect for any result:
-  ```reasonml
+  ```reason
   ResultFuture.fromValue("test")
   -> ResultFuture.effectResult(result => Js.log("Error or value: " ++ Js.String.make(result)))
   -> ResultFuture.getOk(Js.log); // "test"
@@ -201,14 +201,14 @@ it is recommended that when using this lib the type `t` would be preferred.
 - `waitEffectOk`, `waitEffectError`, `waitEffectResult` - Similar to `Future.waitEffect`.
    See `src/ResultFuture.rei` for signatures and unit tests for usage examples.
 - `getOk` - Get ok value for "final" operation. (getOk returns unit.)
-  ```reasonml
+  ```reason
   resultFuture
   -> ResultFuture.getOk(value => {
     Js.log("Value " ++ value ++ " handled successfully");
   });
   ```
 - `getError` - Final error handling
-  ```reasonml
+  ```reason
   resultFuture
   -> ResultFuture.effectOk(value => {
     Js.log("Value " ++ value ++ " handled successfully"); 
@@ -218,7 +218,7 @@ it is recommended that when using this lib the type `t` would be preferred.
   });
   ```
 - `getResult`:
-  ```reasonml
+  ```reason
   resultFuture
   -> ResultFuture.getResult(result => switch(result) {
     | Ok(value) => Js.log("Jay! Success: " ++ Js.String.make(value))
@@ -229,7 +229,7 @@ it is recommended that when using this lib the type `t` would be preferred.
 #### Functors
 
 - `flatMapOk`:
-  ```reasonml
+  ```reason
   let longProcessWhichMayFail: string => ResultFuture.t((int, string)) =
     param =>
       ResultFuture.make((resolve, _reject) => {
@@ -246,7 +246,7 @@ it is recommended that when using this lib the type `t` would be preferred.
   ```
 - `flatMapError` - the binded Fn takes an error and evaluates to a ResultFuture.gt.
 - `flatMapResult`:
-  ```reasonml
+  ```reason
   let longProcess: Belt.Result.t(string, exn) => ResultFuture.t(string) =
     result => switch (result) {
       | Ok(value) => ResultFuture.fromValue(value ++ " confirmed")
@@ -257,14 +257,14 @@ it is recommended that when using this lib the type `t` would be preferred.
   -> ResultFuture.getOk(Js.log);  // "kangaroo confirmed"
   ```
 - `mapOk`
-  ```reasonml
+  ```reason
   ResultFuture.fromValue("simple")
   -> ResultFuture.mapOk(value => value ++ " manipulation")
   -> ResultFuture.getOk(Js.log);  // "simple manipulation"
   ```
 - `mapError` - like mapOk, but for error
 - `mapOkResult`:
-  ```reasonml
+  ```reason
   let twister: int => Belt.Result.t(int, exn) =
     number => switch (number mod 2) {
       | 0 => Error(Failure("not allowed"))
