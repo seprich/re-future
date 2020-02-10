@@ -21,16 +21,22 @@ Edit to `bsconfig.json`:
 
 ### Future & ReasonFuture
 
-This library contains two modules `Future` and `ResultFuture`. The `Future` is the most simple unit of evaluable value which presumably resolves at some point in the future. `ResultFuture` is a future that eventually contains `Belt.Result.t` result inside. This is the most useful replacement for Js.Promise because Js.Promise also contains the possibility of resolving to Ok value or rejection to Error value.
+This library contains two modules `Future` and `ResultFuture`. The `Future` is the most simple unit of evaluable value which can resolve at some point in the future. `ResultFuture` is a future that eventually contains `Belt.Result.t` result inside. This is the most useful replacement for Js.Promise because Js.Promise also contains the possibility of resolving to Ok value or rejection to Error value.
 
+The most compact references of `Future` and `ResultFuture` are the interface files:
+* [Future.rei](./src/Future.rei)
+* [ResultFuture.rei](./src/ResultFuture.rei)
+
+Usage examples can be found in this README and from \_\_tests\_\_ -directory.
 This library is namespaced; to simplify access do:
-```reason
+
+```reason    
 module ResultFuture = RejsReFuture.ResultFuture;
-```
-or if you need both at the same time:
-```reason
+//or if you need both at the same time:
 open RejsReFuture;
-```
+```    
+
+# Examples
 
 ## Module `Future`
 
