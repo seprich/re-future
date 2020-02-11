@@ -29,11 +29,15 @@ The most compact references of `Future` and `ResultFuture` are the interface fil
 Usage examples can be found in this README and from \_\_tests\_\_ -directory.
 This library is namespaced; to simplify access do:
 
-```reason    
+```reason
 module ResultFuture = RejsReFuture.ResultFuture;
 // or
 open RejsReFuture;
-```    
+```
+Or even open globally in your `bsconfig.json`:
+```
+"bsc-flags": [ "-open RejsReFuture" ]
+```
 
 # Examples
 
