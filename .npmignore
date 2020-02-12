@@ -1,6 +1,7 @@
 __perf__/
 __tests__/
 lib/
+.gitattributes
 .gitignore
 .merlin
 .travis.yml
