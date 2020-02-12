@@ -1,6 +1,7 @@
 __perf__/
 __tests__/
 lib/
+doc/
 .gitattributes
 .gitignore
 .merlin
