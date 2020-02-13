@@ -36,7 +36,7 @@ Or you can open globally in your `bsconfig.json`:
 ## SDK Documentation and Examples
 
 * [Future](./doc/Future.md)
-* [ResultFuture](./doc/ResultFuture)
+* [ResultFuture](./doc/ResultFuture.md)
 
 More usage examples also in the \_\_tests\_\_/
 
