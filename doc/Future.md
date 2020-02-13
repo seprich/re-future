@@ -20,7 +20,14 @@ type t('a);  // Future.t('a) evaluates to type 'a value in future.
 
 - `toPromise` - To promise - resulted promise is always success:
   ```reasonml
-  Future.fromValue(42) |> Future.toPromise |> Js.Promise.then_(value => { Js.log(value); Js.Promise.resolve(()) }) |> ignore;
+  Future.fromValue(42)
+  |> Future.toPromise
+  |> Js.Promise.then_(
+    value => {
+      Js.log(value);
+      Js.Promise.resolve(());
+  })
+  |> ignore;
   ```
 
 #### Effect functions do not affect the value of the future
